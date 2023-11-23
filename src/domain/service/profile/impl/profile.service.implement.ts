@@ -135,8 +135,11 @@ export class ProfileServiceImpl implements IProfileService {
     const project = await this.profileProjectRepository.findProjectByProjectId(
       Number(projectId),
     );
-    if (!project)
+    if (!project) {
       throw new HttpException('PROJECT_NOT_FOUND', HttpStatus.NOT_FOUND);
+    } else {
+      project.coverImage = project.projectImage[0];
+    }
 
     return project;
   }
@@ -151,6 +154,46 @@ export class ProfileServiceImpl implements IProfileService {
     return profileExperience;
   }
 
+  async getOneProfileExperienceByExperienceId(
+    userId: number,
+    profileId: number,
+    experienceId: number,
+  ): Promise<ProfileExperienceVo | null> {
+    const user = await this.userRepository.findOneById(userId);
+    if (!user) throw new HttpException('USER_NOT_FOUND', HttpStatus.NOT_FOUND);
+
+    const profile = await this.profileRepository.findProfileByProfileId(
+      Number(profileId),
+    );
+    if (!profile)
+      throw new HttpException('PROFILE_NOT_FOUND', HttpStatus.NOT_FOUND);
+    if (profile.user.id !== Number(userId))
+      throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
+
+    const experiencesByProfileId =
+      await this.profileExperienceRepository.findExperienceByProfileId(
+        Number(profileId),
+      );
+
+    if (!experiencesByProfileId)
+      throw new HttpException('EXPERIENCE_NOT_FOUND', HttpStatus.NOT_FOUND);
+
+    const experienceExists = experiencesByProfileId.some(
+      (experience) => experience.id === experienceId,
+    );
+    if (!experienceExists)
+      throw new HttpException('EXPERIENCE_NOT_FOUND', HttpStatus.NOT_FOUND);
+
+    const experience =
+      await this.profileExperienceRepository.findExperienceByExperienceId(
+        Number(experienceId),
+      );
+    if (!experience)
+      throw new HttpException('EXPERIENCE_NOT_FOUND', HttpStatus.NOT_FOUND);
+
+    return experience;
+  }
+
   async getProfileEducation(
     profileId: number,
   ): Promise<ProfileEducationVo[] | null> {
@@ -159,6 +202,46 @@ export class ProfileServiceImpl implements IProfileService {
         Number(profileId),
       );
     return profileEducation;
+  }
+
+  async getOneProfileEducationByEducationId(
+    userId: number,
+    profileId: number,
+    educationId: number,
+  ): Promise<ProfileEducationVo | null> {
+    const user = await this.userRepository.findOneById(userId);
+    if (!user) throw new HttpException('USER_NOT_FOUND', HttpStatus.NOT_FOUND);
+
+    const profile = await this.profileRepository.findProfileByProfileId(
+      Number(profileId),
+    );
+    if (!profile)
+      throw new HttpException('PROFILE_NOT_FOUND', HttpStatus.NOT_FOUND);
+    if (profile.user.id !== Number(userId))
+      throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
+
+    const educationsByProfileId =
+      await this.profileEducationRepository.findEducationByProfileId(
+        Number(profileId),
+      );
+
+    if (!educationsByProfileId)
+      throw new HttpException('EDUCATION_NOT_FOUND', HttpStatus.NOT_FOUND);
+
+    const educationExists = educationsByProfileId.some(
+      (education) => education.id === educationId,
+    );
+    if (!educationExists)
+      throw new HttpException('EDUCATION_NOT_FOUND', HttpStatus.NOT_FOUND);
+
+    const education =
+      await this.profileEducationRepository.findEducationByEducationId(
+        Number(educationId),
+      );
+    if (!education)
+      throw new HttpException('EDUCATION_NOT_FOUND', HttpStatus.NOT_FOUND);
+
+    return education;
   }
 
   async getProfileWebsite(

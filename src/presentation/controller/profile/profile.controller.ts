@@ -92,11 +92,41 @@ export class ProfileController {
     return await this.profileService.getProfileExperience(profileId);
   }
 
+  @Get('/:profileId/experience/:experienceId')
+  async getOneProfileExperienceByExperienceId(
+    @Headers('authorization') token: string,
+    @Param('profileId') profileId: number,
+    @Param('experienceId') experienceId: number,
+  ): Promise<ProfileExperienceVo | null> {
+    const decodedToken = this.verifyToken(token);
+    const userId = decodedToken.aud;
+    return await this.profileService.getOneProfileExperienceByExperienceId(
+      Number(userId),
+      Number(profileId),
+      Number(experienceId),
+    );
+  }
+
   @Get('/:profileId/education')
   async getProfileEducation(
     @Param('profileId') profileId: number,
   ): Promise<ProfileEducationVo[] | null> {
     return await this.profileService.getProfileEducation(profileId);
+  }
+
+  @Get('/:profileId/education/:educationId')
+  async getOneProfileEducationByEducationId(
+    @Headers('authorization') token: string,
+    @Param('profileId') profileId: number,
+    @Param('educationId') educationId: number,
+  ): Promise<ProfileEducationVo | null> {
+    const decodedToken = this.verifyToken(token);
+    const userId = decodedToken.aud;
+    return await this.profileService.getOneProfileEducationByEducationId(
+      Number(userId),
+      Number(profileId),
+      Number(educationId),
+    );
   }
 
   @Get('/:profileId/website')
