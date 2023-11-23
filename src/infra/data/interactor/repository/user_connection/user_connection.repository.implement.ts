@@ -130,12 +130,32 @@ export class UserConnectionRepositoryImpl implements IUserConnectionRepository {
     userId: number,
     connectedUserId: number,
   ): Promise<UserConnectionVo | null> {
-    return await this.userConnectionTypeormRepository.findOneBy({
-      user: {
-        id: userId,
+    return await this.userConnectionTypeormRepository.findOne({
+      where: {
+        user: [
+          {
+            id: userId,
+          },
+          {
+            id: connectedUserId,
+          },
+        ],
+        connectedUser: [
+          {
+            id: userId,
+          },
+          {
+            id: connectedUserId,
+          },
+        ],
       },
-      connectedUser: {
-        id: connectedUserId,
+      select: {
+        user: {
+          id: true,
+        },
+        connectedUser: {
+          id: true,
+        },
       },
     });
   }
