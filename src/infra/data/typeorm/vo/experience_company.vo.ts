@@ -23,7 +23,7 @@ export class ExperienceCompanyVo extends BaseEntity {
   @Column({
     type: 'varchar',
     length: 2000,
-    default: '',
+    // default: '',
     nullable: true,
   })
   logo: string;

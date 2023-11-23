@@ -308,6 +308,8 @@ export class ProfileServiceImpl implements IProfileService {
     if (startDate) profileProject.startDate = startDate;
     if (endDate) profileProject.endDate = endDate;
     if (projectImages)
+      // if (projectImages || projectImages[0] !== '')
+      // if (projectImages !== undefined)
       profileProject.projectImage = this.createImageVos(projectImages);
     if (projectCategory)
       profileProject.projectCategory = this.createCategoryVos(projectCategory);
@@ -374,7 +376,6 @@ export class ProfileServiceImpl implements IProfileService {
       throw new HttpException('PROFILE_NOT_FOUND', HttpStatus.NOT_FOUND);
     if (profile.user.id !== Number(userId))
       throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
-
     const profileEducation = new ProfileEducationVo();
     if (profile) profileEducation.profile = profile;
     if (course) profileEducation.course = course;
@@ -383,6 +384,17 @@ export class ProfileServiceImpl implements IProfileService {
     if (endDate) profileEducation.endDate = endDate;
     if (educationInstitute)
       profileEducation.educationInstitute = educationInstitute;
+
+    if (educationInstitute) {
+      if (profileEducation.educationInstitute.logo === '') {
+        profileEducation.educationInstitute.logo =
+          'https://images.unsplash.com/photo-1607513746994-51f730a44832?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+      } else {
+        profileEducation.educationInstitute.logo = educationInstitute.logo;
+      }
+    }
+    if (educationInstitute)
+      profileEducation.educationInstitute.name = educationInstitute.name;
 
     return this.profileEducationRepository.create(profileEducation);
   }
@@ -813,7 +825,12 @@ export class ProfileServiceImpl implements IProfileService {
   private createImageVos(images: string[]): ProjectImageVo[] {
     return images.map((item) => {
       const imageVo = new ProjectImageVo();
-      imageVo.image = item;
+      if (item === '') {
+        imageVo.image =
+          'https://images.unsplash.com/photo-1607513746994-51f730a44832?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+      } else {
+        imageVo.image = item;
+      }
       return imageVo;
     });
   }
@@ -829,7 +846,12 @@ export class ProfileServiceImpl implements IProfileService {
   ): ExperienceCompanyVo {
     const companyVo = new ExperienceCompanyVo();
     companyVo.name = company.name;
-    companyVo.logo = company.logo;
+    if (company.logo === '') {
+      companyVo.logo =
+        'https://images.unsplash.com/photo-1607513746994-51f730a44832?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+    } else {
+      companyVo.logo = company.logo;
+    }
     companyVo.location = company.location;
 
     return companyVo;

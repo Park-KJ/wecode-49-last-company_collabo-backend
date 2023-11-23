@@ -21,7 +21,7 @@ export class ProjectImageVo extends BaseEntity {
   @Column({
     type: 'varchar',
     length: 2000,
-    default: '',
+    // default: '',
   })
   image: string;
 

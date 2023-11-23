@@ -22,14 +22,14 @@ export class UserServiceImpl implements IUserService {
     // 이메일 : ., @ 포함 필수, 2자 이상
     const emailRegex = /^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/;
     if (!emailRegex.test(userData.email)) {
-      throw new HttpException('KEY ERROR(email)', HttpStatus.BAD_REQUEST);
+      throw new HttpException('KEY_ERROR', HttpStatus.BAD_REQUEST);
     }
 
     // 비밀번호 : 숫자, 소문자, 대문자, 특수문자, 8자 이상
     const passwordRegex =
       /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W)(?!.* ).{8,}$/;
     if (!passwordRegex.test(userData.password)) {
-      throw new HttpException('KEY ERROR(password)', HttpStatus.BAD_REQUEST);
+      throw new HttpException('KEY_ERROR', HttpStatus.BAD_REQUEST);
     }
 
     const encodedPassword = await bcrypt.hash(userData.password, 10);
