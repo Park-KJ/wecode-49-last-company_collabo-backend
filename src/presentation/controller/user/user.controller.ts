@@ -26,7 +26,7 @@ export class UserController {
   @Post('/signup')
   async signUp(@Body() userData: SignUpRequestDto): Promise<void> {
     if (!userData || !userData.email || !userData.password) {
-      throw new HttpException('KEY ERROR(not input)', HttpStatus.BAD_REQUEST);
+      throw new HttpException('KEY_ERROR', HttpStatus.BAD_REQUEST);
     }
 
     return await this.userService.signUp(userData);

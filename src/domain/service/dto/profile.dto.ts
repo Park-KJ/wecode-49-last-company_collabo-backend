@@ -16,7 +16,7 @@ export type ProfileProjectDto = {
   description?: string;
   startDate: Date;
   endDate?: Date | null;
-  projectImages?: string[];
+  projectImages: string[];
   projectCategory?: string;
 };
 

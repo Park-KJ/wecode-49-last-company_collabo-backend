@@ -164,7 +164,7 @@ export class ProfileController {
       description: body.description,
       startDate: body.startDate!,
       endDate: body.endDate,
-      projectImages: body.projectImages,
+      projectImages: body.projectImages!,
       projectCategory: body.projectCategory,
     };
 
@@ -269,7 +269,7 @@ export class ProfileController {
       description: body.description,
       startDate: body.startDate!,
       endDate: body.endDate,
-      projectImages: body.projectImages,
+      projectImages: body.projectImages!,
       projectCategory: body.projectCategory,
       userId: decodedToken.aud,
     };
