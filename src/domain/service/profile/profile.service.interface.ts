@@ -27,7 +27,17 @@ export interface IProfileService {
   getProfileExperience(
     profileId: number,
   ): Promise<ProfileExperienceVo[] | null>;
+  getOneProfileExperienceByExperienceId(
+    userId: number,
+    profileId: number,
+    experienceId: number,
+  ): Promise<ProfileExperienceVo | null>;
   getProfileEducation(profileId: number): Promise<ProfileEducationVo[] | null>;
+  getOneProfileEducationByEducationId(
+    userId: number,
+    profileId: number,
+    educationId: number,
+  ): Promise<ProfileEducationVo | null>;
   getProfileWebsite(profileId: number): Promise<ProfileWebsiteVo[] | null>;
   createProfile(profileDto: ProfileDto): Promise<void>;
   createProfileProject(
