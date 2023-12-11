@@ -1,26 +1,21 @@
 import { Inject, Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { JwtService } from '@nestjs/jwt';
 
 import { IUserService } from '../user.service.interface';
-import {
-  FEED_REPOSITORY,
-  USER_REPOSITORY,
-} from 'src/infra/data/interactor/repository/ioc';
-import { IFeedRepository } from 'src/domain/interactor/data/repository/feed.repository.interface';
+import { USER_REPOSITORY } from 'src/infra/data/interactor/repository/ioc';
 import { IUserRepository } from 'src/domain/interactor/data/repository/user.repository.interface';
 import {
   LoginResponseDto,
   SignUpRequestDto,
 } from 'src/domain/service/dto/user.dto';
+import { UserVo } from 'src/infra/data/typeorm/vo/user.vo';
+import { SecurityServiceImpl } from '../../security/impl/security.service.implement';
 
 @Injectable()
 export class UserServiceImpl implements IUserService {
   constructor(
     @Inject(USER_REPOSITORY) private readonly userRepository: IUserRepository,
-    @Inject(FEED_REPOSITORY) private readonly feedRepository: IFeedRepository,
-    private readonly JwtService: JwtService,
+    private readonly securityService: SecurityServiceImpl,
   ) {}
 
   async signUp(userData: SignUpRequestDto): Promise<void> {
@@ -53,10 +48,14 @@ export class UserServiceImpl implements IUserService {
     const comparison = await bcrypt.compare(password, hashed);
     if (!comparison)
       throw new HttpException('INVALID_PASSWORD', HttpStatus.BAD_REQUEST);
-    const token = await this.JwtService.signAsync({
+    const token = this.securityService.sign({
       aud: userInfo.id,
     });
     this.userRepository.findOneByEmail(email);
     return { token: token, user: userInfo };
+  }
+
+  async getOne(userId: number): Promise<UserVo | null> {
+    return this.userRepository.findOneById(userId);
   }
 }

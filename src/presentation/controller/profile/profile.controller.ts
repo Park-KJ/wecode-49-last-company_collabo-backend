@@ -4,15 +4,13 @@ import {
   Get,
   Inject,
   Param,
-  Headers,
   Post,
   HttpException,
   HttpStatus,
+  UseGuards,
   Delete,
   Put,
 } from '@nestjs/common';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { JwtService } from '@nestjs/jwt';
 
 import {
   ProfileDto,
@@ -32,20 +30,18 @@ import { ProfileEducationVo } from 'src/infra/data/typeorm/vo/profile_education.
 import { ProfileExperienceVo } from 'src/infra/data/typeorm/vo/profile_experience.vo';
 import { ProfileProjectVo } from 'src/infra/data/typeorm/vo/profile_project.vo';
 import { ProfileWebsiteVo } from 'src/infra/data/typeorm/vo/profile_website.vo';
+import { AuthUser } from 'src/domain/interactor/decorator/auth.decorator';
+import { AuthGuard } from 'src/domain/interactor/guard/auth.guard';
 
 @Controller('/profile')
+@UseGuards(AuthGuard)
 export class ProfileController {
   constructor(
     @Inject(PROFILE_SERVICE) private readonly profileService: IProfileService,
-    private readonly JwtService: JwtService,
   ) {}
 
-  @Get('/profileId') // 로그인 한 유저의 profileId 검색
-  async getProfileId(
-    @Headers('authorization') token: string,
-  ): Promise<ProfileVo | null> {
-    const decodedToken = this.verifyToken(token);
-    const userId = decodedToken.aud;
+  @Get('/profileId')
+  async getProfileId(@AuthUser() userId: number): Promise<ProfileVo | null> {
     return await this.profileService.getProfileId(userId);
   }
 
@@ -72,12 +68,10 @@ export class ProfileController {
 
   @Get('/:profileId/project/:projectId')
   async getOneProfileProjectByProjectId(
-    @Headers('authorization') token: string,
+    @AuthUser() userId: number,
     @Param('profileId') profileId: number,
     @Param('projectId') projectId: number,
   ): Promise<ProfileProjectVo | null> {
-    const decodedToken = this.verifyToken(token);
-    const userId = decodedToken.aud;
     return await this.profileService.getOneProfileProjectByProjectId(
       Number(userId),
       Number(profileId),
@@ -138,28 +132,30 @@ export class ProfileController {
 
   @Post()
   async createProfile(
+    @AuthUser() userId: number,
     @Body() body: Partial<ProfileDto>,
-    @Headers('authorization') token: string,
   ): Promise<void> {
-    const decodedToken = this.verifyToken(token);
     const profileDto: ProfileDto = {
-      userId: decodedToken.aud,
-      ...body,
+      userId: userId,
+      jobDescription: body.jobDescription,
+      about: body.about,
+      location: body.location,
+      address: body.address,
+      profileBackImage: body.profileBackImage,
     };
     return await this.profileService.createProfile(profileDto);
   }
 
   @Post('/:profileId/project')
   async createProfileProject(
+    @AuthUser() userId: number,
     @Param('profileId') profileId: number,
     @Body() body: Partial<ProfileProjectDto>,
-    @Headers('authorization') token: string,
   ): Promise<void> {
     if (!body.title || !body.startDate)
       throw new HttpException('KEY_ERROR', HttpStatus.BAD_REQUEST);
-    const decodedToken = this.verifyToken(token);
     const profileProjectDto: ProfileProjectDto = {
-      userId: decodedToken.aud,
+      userId: userId,
       title: body.title!,
       description: body.description,
       startDate: body.startDate!,
@@ -176,15 +172,14 @@ export class ProfileController {
 
   @Post('/:profileId/experience')
   async createProfileExperience(
+    @AuthUser() userId: number,
     @Param('profileId') profileId: number,
     @Body() body: Partial<ProfileExperienceDto>,
-    @Headers('authorization') token: string,
   ): Promise<void> {
     if (!body.position || !body.startDate)
       throw new HttpException('KEY_ERROR', HttpStatus.BAD_REQUEST);
-    const decodedToken = this.verifyToken(token);
     const profileExperienceDto: ProfileExperienceDto = {
-      userId: decodedToken.aud,
+      userId: userId,
       position: body.position!,
       description: body.description,
       startDate: body.startDate!,
@@ -200,15 +195,14 @@ export class ProfileController {
 
   @Post('/:profileId/education')
   async createProfileEducation(
+    @AuthUser() userId: number,
     @Param('profileId') profileId: number,
     @Body() body: Partial<ProfileEducationDto>,
-    @Headers('authorization') token: string,
   ): Promise<void> {
     if (!body.course || !body.startDate)
       throw new HttpException('KEY_ERROR', HttpStatus.NOT_FOUND);
-    const decodedToken = this.verifyToken(token);
     const profileEducationDto: ProfileEducationDto = {
-      userId: decodedToken.aud,
+      userId: userId,
       course: body.course!, // 학과, 전공 설명 입력
       description: body.description, // 추가 정보
       startDate: body.startDate!,
@@ -223,15 +217,14 @@ export class ProfileController {
 
   @Post('/:profileId/website')
   async createProfileWebsite(
+    @AuthUser() userId: number,
     @Param('profileId') profileId: number,
     @Body() body: Partial<ProfileWebsiteDto>,
-    @Headers('authorization') token: string,
   ): Promise<void> {
     if (!body.type || !body.url)
       throw new HttpException('KEY_ERROR', HttpStatus.BAD_REQUEST);
-    const decodedToken = this.verifyToken(token);
     const profileWebsiteDto: ProfileWebsiteDto = {
-      userId: decodedToken.aud,
+      userId: userId,
       type: body.type!,
       url: body.url!,
     };
@@ -244,26 +237,24 @@ export class ProfileController {
 
   @Put('/:profileId')
   async updateProfile(
-    @Headers('authorization') token: string,
+    @AuthUser() userId: number,
     @Param('profileId') profileId: number,
     @Body() body: Partial<ProfileDto>,
   ): Promise<void> {
-    const decodedToken = this.verifyToken(token);
     const profileUpdateDto: ProfileDto = {
       ...body,
-      userId: decodedToken.aud,
+      userId: userId,
     };
     return await this.profileService.updateProfile(profileUpdateDto, profileId);
   }
 
   @Put('/:profileId/project/:projectId')
   async updateProfileProject(
-    @Headers('authorization') token: string,
+    @AuthUser() userId: number,
     @Param('profileId') profileId: number,
     @Param('projectId') projectId: number,
     @Body() body: Partial<ProfileProjectDto>,
   ): Promise<void> {
-    const decodedToken = this.verifyToken(token);
     const profileProjectUpdateDto: ProfileProjectDto = {
       title: body.title!,
       description: body.description,
@@ -271,7 +262,7 @@ export class ProfileController {
       endDate: body.endDate,
       projectImages: body.projectImages!,
       projectCategory: body.projectCategory,
-      userId: decodedToken.aud,
+      userId: userId,
     };
     return await this.profileService.updateProfileProject(
       profileProjectUpdateDto,
@@ -282,19 +273,18 @@ export class ProfileController {
 
   @Put('/:profileId/experience/:experienceId')
   async updateProfileExperience(
-    @Headers('authorization') token: string,
+    @AuthUser() userId: number,
     @Param('profileId') profileId: number,
     @Param('experienceId') experienceId: number,
     @Body() body: Partial<ProfileExperienceDto>,
   ): Promise<void> {
-    const decodedToken = this.verifyToken(token);
     const profileExperienceUpdateDto: ProfileExperienceDto = {
       position: body.position!,
       description: body.description,
       startDate: body.startDate!,
       endDate: body.endDate,
       experienceCompany: body.experienceCompany,
-      userId: decodedToken.aud,
+      userId: userId,
     };
     return await this.profileService.updateProfileExperience(
       profileExperienceUpdateDto,
@@ -305,19 +295,18 @@ export class ProfileController {
 
   @Put('/:profileId/education/:educationId')
   async updateProfileEducation(
-    @Headers('authorization') token: string,
+    @AuthUser() userId: number,
     @Param('profileId') profileId: number,
     @Param('educationId') educationId: number,
     @Body() body: Partial<ProfileEducationDto>,
   ): Promise<void> {
-    const decodedToken = this.verifyToken(token);
     const profileEducationUpdateDto: ProfileEducationDto = {
       course: body.course!,
       description: body.description,
       startDate: body.startDate!,
       endDate: body.endDate,
       educationInstitute: body.educationInstitute!,
-      userId: decodedToken.aud,
+      userId: userId,
     };
 
     return await this.profileService.updateProfileEducation(
@@ -329,16 +318,15 @@ export class ProfileController {
 
   @Put('/:profileId/website/:websiteId')
   async updateProfileWebsite(
-    @Headers('authorization') token: string,
+    @AuthUser() userId: number,
     @Param('profileId') profileId: number,
     @Param('websiteId') websiteId: number,
     @Body() body: Partial<ProfileWebsiteDto>,
   ): Promise<void> {
-    const decodedToken = this.verifyToken(token);
     const profileWebsiteUpdateDto: ProfileWebsiteDto = {
       type: body.type!,
       url: body.url!,
-      userId: decodedToken.aud,
+      userId: userId,
     };
     return this.profileService.updateProfileWebsite(
       profileWebsiteUpdateDto,
@@ -349,14 +337,13 @@ export class ProfileController {
 
   @Delete('/:profileId/project/:projectId')
   async deleteProfileProject(
-    @Headers('authorization') token: string,
+    @AuthUser() userId: number,
     @Param('profileId') profileId: number,
     @Param('projectId') projectId: number,
   ): Promise<void> {
-    const decodedToken = this.verifyToken(token);
 
     const profileProjectDeleteDto: ProfileProjectDeleteDto = {
-      userId: decodedToken.aud,
+      userId: userId,
       profileId: Number(profileId),
       projectId: Number(projectId),
     };
@@ -368,14 +355,13 @@ export class ProfileController {
 
   @Delete('/:profileId/experience/:experienceId')
   async deleteProfileExperience(
-    @Headers('authorization') token: string,
+    @AuthUser() userId: number,
     @Param('profileId') profileId: number,
     @Param('experienceId') experienceId: number,
   ): Promise<void> {
-    const decodedToken = this.verifyToken(token);
 
     const profileExperienceDeleteDto: ProfileExperienceDeleteDto = {
-      userId: decodedToken.aud,
+      userId: userId,
       profileId: Number(profileId),
       experienceId: Number(experienceId),
     };
@@ -387,13 +373,12 @@ export class ProfileController {
 
   @Delete('/:profileId/education/:educationId')
   async deleteProfileEducation(
-    @Headers('authorization') token: string,
+    @AuthUser() userId: number,
     @Param('profileId') profileId: number,
     @Param('educationId') educationId: number,
   ): Promise<void> {
-    const decodedToken = this.verifyToken(token);
     const profileEducationDeleteDto: ProfileEducationDeleteDto = {
-      userId: decodedToken.aud,
+      userId: userId,
       profileId: Number(profileId),
       educationId: Number(educationId),
     };
@@ -404,23 +389,17 @@ export class ProfileController {
 
   @Delete('/:profileId/website/:websiteId')
   async deleteProfileWebsite(
-    @Headers('authorization') token: string,
+    @AuthUser() userId: number,
     @Param('profileId') profileId: number,
     @Param('websiteId') websiteId: number,
   ): Promise<void> {
-    const decodedToken = this.verifyToken(token);
     const profileWebsiteDeleteDto: ProfileWebsiteDeleteDto = {
-      userId: decodedToken.aud,
+      userId: userId,
       profileId: Number(profileId),
       websiteId: Number(websiteId),
     };
     return await this.profileService.deleteProfileWebsite(
       profileWebsiteDeleteDto,
     );
-  }
-
-  verifyToken(token: string): { aud: number } {
-    const decoded = this.JwtService.verify(token);
-    return decoded;
   }
 }
