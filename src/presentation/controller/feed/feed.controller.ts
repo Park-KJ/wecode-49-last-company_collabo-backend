@@ -20,12 +20,12 @@ import { FEED_SERVICE } from 'src/domain/service/ioc';
 import { FeedVo } from 'src/infra/data/typeorm/vo/feed.vo';
 import {
   FeedLikeDto,
-  FeedsDto,
   FeedCreateDto,
   FeedCommentDto,
   FeedQueryDto,
   FeedDeleteDto,
   SortParam,
+  FeedsDto,
 } from 'src/domain/service/dto/feed.dto';
 
 @Controller('/feed')

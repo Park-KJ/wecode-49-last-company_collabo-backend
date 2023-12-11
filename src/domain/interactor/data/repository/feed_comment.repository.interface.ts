@@ -5,4 +5,5 @@ export interface IFeedCommentRepository {
   findOneById(commentId: number): Promise<FeedCommentVo | null>;
   remove(comment: FeedCommentVo): Promise<void>;
   update(comment: FeedCommentVo): Promise<void>;
+  findByFeedIds(feedIds: (number | string)[]): Promise<FeedCommentVo[]>;
 }

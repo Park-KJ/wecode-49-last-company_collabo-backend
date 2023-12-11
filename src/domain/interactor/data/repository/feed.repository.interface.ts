@@ -9,4 +9,8 @@ export interface IFeedRepository {
   update(updatedFeed: FeedVo): Promise<void>;
   findOneWithRelationsById(feedId: number): Promise<FeedVo | null>;
   remove(feed: FeedVo): Promise<void>;
+  findConnectedUserRecentFeeds(
+    connectedUserIds: number[],
+    limit: number,
+  ): Promise<FeedVo[]>;
 }

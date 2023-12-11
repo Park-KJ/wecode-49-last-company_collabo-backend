@@ -1,12 +1,12 @@
 import { FeedVo } from 'src/infra/data/typeorm/vo/feed.vo';
 import {
   FeedLikeDto,
-  FeedsDto,
   FeedCreateDto,
   FeedCommentDto,
   FeedQueryDto,
   FeedCommentDeleteDto,
   FeedDeleteDto,
+  FeedsDto,
 } from '../dto/feed.dto';
 
 export interface IFeedService {

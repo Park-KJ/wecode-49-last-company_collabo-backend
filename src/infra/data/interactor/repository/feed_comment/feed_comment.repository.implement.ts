@@ -31,4 +31,21 @@ export class FeedCommentRepositoryImpl implements IFeedCommentRepository {
   async update(updatedComment: FeedCommentVo): Promise<void> {
     await this.feedCommentTypeormRepository.save(updatedComment);
   }
+
+  async findByFeedIds(feedIds: (string | number)[]): Promise<FeedCommentVo[]> {
+    return await this.feedCommentTypeormRepository
+      .createQueryBuilder('feed_comment')
+      .select([
+        'feed_comment.id',
+        'feed_comment.content',
+        'feed_comment.createdAt',
+        'feed_comment.updatedAt',
+      ])
+      .leftJoin('feed_comment.commenter', 'commenter')
+      .leftJoin('feed_comment.commentedFeed', 'commentedFeed')
+      .addSelect(['commenter.id', 'commenter.name', 'commenter.profileImage'])
+      .addSelect(['commentedFeed.id'])
+      .where('feed_comment.commentedFeedId IN (:feedIds)', { feedIds: feedIds })
+      .getMany();
+  }
 }
